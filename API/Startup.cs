@@ -38,6 +38,10 @@ namespace API
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddTransient<IJWTManager, JWTManager>();
 
+
+            services.AddScoped<IPrescriptionInstructionRepository, PrescriptionInstructionRepository>();
+            services.AddScoped<IPrescriptionMedicineRepository, PrescriptionMedicineRepository>();
+
             services.AddScoped<IPatientRepository, PatientRepository>();
             services.AddScoped<IKnowingRepository, KnowingRepository>();
             services.AddScoped<IMedicineRepository, MedicineRepository>();         

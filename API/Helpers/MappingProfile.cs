@@ -33,10 +33,22 @@ namespace API.Helpers
             CreateMap<PrescriptionForAddDTO, Prescription>()
                 .ForMember(x => x.PrescriptionInstructions, opt => opt.Ignore())
                 .ForMember(x => x.PrescriptionMedicines, opt => opt.Ignore());
+            CreateMap<PrescriptionForEditDTO, Prescription>()
+                .ForMember(x => x.PrescriptionInstructions, opt => opt.Ignore())
+                .ForMember(x => x.PrescriptionMedicines, opt => opt.Ignore());
             CreateMap<PrescriptionInstructionForAddDTO, PrescriptionInstruction>();
             CreateMap<PrescriptionMedicineForAddDTO, PrescriptionMedicine>();
 
             // Entity to API DTO
+            CreateMap<Prescription, PrescriptionForGetDTO>();
+            CreateMap<PrescriptionInstruction, PrescriptionInstructionForGetDTO>()
+                     .ForMember(dest => dest.ArabicInstruction, opt => opt.MapFrom(src => src.Instruction.ArabicName))
+                     .ForMember(dest => dest.EnglishInstruction, opt => opt.MapFrom(src => src.Instruction.EnglishName));
+            CreateMap<PrescriptionMedicine, PrescriptionMedicineForGetDTO>()
+                   .ForMember(dest => dest.ArabicFrequency, opt => opt.MapFrom(src => src.Frequency.ArabicName))
+                   .ForMember(dest => dest.EnglishFrequency, opt => opt.MapFrom(src => src.Frequency.EnglishName))
+                   .ForMember(dest => dest.Medicine, opt => opt.MapFrom(src => src.Medicine.Name)); 
+
             CreateMap<Knowing, KnowingForGetDTO>();
             CreateMap<Frequency, FrequencyForGetDTO>();
             CreateMap<Occupation, OccupationForGetDTO>();

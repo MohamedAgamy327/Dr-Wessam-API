@@ -27,19 +27,16 @@ namespace Repository.Repository
         }
         public async Task<Prescription> Get(int id)
         {
-            return await context.Prescriptions.FindAsync(id);
+            return await context.Prescriptions.Include(d => d.PrescriptionInstructions).Include(k => k.PrescriptionMedicines).AsNoTracking().SingleOrDefaultAsync(s => s.Id == id);
         }
         public async Task<IEnumerable<Prescription>> Get()
         {
             return await context.Prescriptions.ToListAsync();
         }
 
-        public async Task<IEnumerable<Prescription>> GetPatient(int patientId)
+        public async Task<IEnumerable<Prescription>> GetForPatient(int patientId)
         {
-            return await context.Prescriptions.Where(w => w.PatientId == patientId)
-                .Include(k => k.PrescriptionInstructions)
-                .Include(p=>p.Patient)
-                .Include(i => i.PrescriptionMedicines).ToListAsync();
+            return await context.Prescriptions.Where(w => w.PatientId == patientId).ToListAsync();
         }
 
         public void Remove(Prescription prescription)

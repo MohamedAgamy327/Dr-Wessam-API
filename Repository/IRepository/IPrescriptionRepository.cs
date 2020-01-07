@@ -10,7 +10,7 @@ namespace Repository.IRepository
         Prescription Edit(Prescription prescription);
         void Remove(Prescription prescription);
         Task<Prescription> Get(int id);
-        Task<IEnumerable<Prescription>> GetPatient(int patientId);
+        Task<IEnumerable<Prescription>> GetForPatient(int patientId);
         Task<IEnumerable<Prescription>> Get();
     }
 }

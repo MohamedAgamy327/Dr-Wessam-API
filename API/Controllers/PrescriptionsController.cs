@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using API.DTO.Prescription;
 using AutoMapper;
@@ -17,12 +16,17 @@ namespace API.Controllers
         private readonly IMapper mapper;
         private readonly IUnitOfWork unitOfWork;
         private readonly IPrescriptionRepository prescriptionRepository;
+        private readonly IPrescriptionMedicineRepository prescriptionMedicineRepository;
+        private readonly IPrescriptionInstructionRepository prescriptionInstructionRepository;
 
-        public PrescriptionsController(IMapper mapper, IUnitOfWork unitOfWork, IPrescriptionRepository prescriptionRepository)
+
+        public PrescriptionsController(IMapper mapper, IUnitOfWork unitOfWork, IPrescriptionRepository prescriptionRepository, IPrescriptionInstructionRepository prescriptionInstructionRepository, IPrescriptionMedicineRepository prescriptionMedicineRepository)
         {
             this.mapper = mapper;
             this.unitOfWork = unitOfWork;
             this.prescriptionRepository = prescriptionRepository;
+            this.prescriptionInstructionRepository = prescriptionInstructionRepository;
+            this.prescriptionMedicineRepository = prescriptionMedicineRepository;
         }
 
         [HttpPost]
@@ -33,42 +37,61 @@ namespace API.Controllers
             prescription.PrescriptionMedicines = mapper.Map<List<PrescriptionMedicine>>(model.PrescriptionMedicines);
             await prescriptionRepository.Add(prescription).ConfigureAwait(true);
             await unitOfWork.CompleteAsync().ConfigureAwait(true);
-            //return Ok(mapper.Map<PrescriptionForGetDTO>(await prescriptionRepository.Get(prescription.Id).ConfigureAwait(true)));
-            return Ok();
+            return Ok(mapper.Map<PrescriptionForGetDTO>(await prescriptionRepository.Get(prescription.Id).ConfigureAwait(true)));
         }
 
-        //[HttpPut]
-        //public async Task<IActionResult> Put(PrescriptionForEditDTO model)
-        //{
-        //    Prescription prescription = mapper.Map<Prescription>(model);
-        //    prescriptionRepository.Edit(prescription);
-        //    await unitOfWork.CompleteAsync().ConfigureAwait(true);
-        //    return Ok(mapper.Map<PrescriptionForGetDTO>(await prescriptionRepository.Get(prescription.Id).ConfigureAwait(true)));
-        //}
+        [HttpPut]
+        public async Task<IActionResult> Put(PrescriptionForEditDTO model)
+        {
+            prescriptionInstructionRepository.Remove(model.Id);
+            prescriptionMedicineRepository.Remove(model.Id);
 
-        //[Route("{id:int}")]
-        //[HttpDelete]
-        //public async Task<IActionResult> Delete(int id)
-        //{
-        //    Prescription prescription = await prescriptionRepository.Get(id).ConfigureAwait(true);
-        //    prescriptionRepository.Remove(prescription);
-        //    await unitOfWork.CompleteAsync().ConfigureAwait(true);
-        //    return Ok(mapper.Map<PrescriptionForGetDTO>(prescription));
-        //}
+            Prescription prescription = await prescriptionRepository.Get(model.Id).ConfigureAwait(true);
+            prescription = mapper.Map<Prescription>(model);
+
+            prescription.PrescriptionInstructions = mapper.Map<List<PrescriptionInstruction>>(model.PrescriptionInstructions);
+            prescription.PrescriptionMedicines = mapper.Map<List<PrescriptionMedicine>>(model.PrescriptionMedicines);
+            prescriptionRepository.Edit(prescription);
+            await unitOfWork.CompleteAsync().ConfigureAwait(true);
+            return Ok(mapper.Map<PrescriptionForGetDTO>(await prescriptionRepository.Get(prescription.Id).ConfigureAwait(true)));
+        }
 
         [Route("{id:int}")]
-        [HttpGet]
-        public async Task<IActionResult> Get(int id)
+        [HttpDelete]
+        public async Task<IActionResult> Delete(int id)
         {
-            var x = await prescriptionRepository.GetPatient(id).ConfigureAwait(true);
-            return Ok(x);
-            //return Ok(mapper.Map<List<PrescriptionForGetDTO>>(await prescriptionRepository.Get().ConfigureAwait(true)));
+            Prescription prescription = await prescriptionRepository.Get(id).ConfigureAwait(true);
+            prescriptionRepository.Remove(prescription);
+            await unitOfWork.CompleteAsync().ConfigureAwait(true);
+            return Ok(mapper.Map<PrescriptionForGetDTO>(prescription));
         }
 
-        //[HttpGet("{id}")]
-        //public async Task<IActionResult> Get(int id)
-        //{
-        //    return Ok(mapper.Map<PrescriptionForGetDTO>(await prescriptionRepository.Get(id).ConfigureAwait(true)));
-        //}
+        [HttpGet("{id}")]
+        public async Task<IActionResult> Get(int id)
+        {
+            return Ok(mapper.Map<PrescriptionForGetDTO>(await prescriptionRepository.Get(id).ConfigureAwait(true)));
+        }
+
+        [Route("patients/{patientId:int}")]
+        [HttpGet]
+        public async Task<IActionResult> GetForPatient(int patientId)
+        {
+            return Ok(mapper.Map<List<PrescriptionForGetDTO>>(await prescriptionRepository.GetForPatient(patientId).ConfigureAwait(true)));
+        }
+
+        [Route("{id:int}/medicines")]
+        [HttpGet]
+        public async Task<IActionResult> GetMedicines(int id)
+        {
+            return Ok(mapper.Map<List<PrescriptionMedicineForGetDTO>>(await prescriptionMedicineRepository.Get(id).ConfigureAwait(true)));
+        }
+
+        [Route("{id:int}/instructions")]
+        [HttpGet]
+        public async Task<IActionResult> GetInstructions(int id)
+        {
+            return Ok(mapper.Map<List<PrescriptionInstructionForGetDTO>>(await prescriptionInstructionRepository.Get(id).ConfigureAwait(true)));
+        }
+
     }
 }
