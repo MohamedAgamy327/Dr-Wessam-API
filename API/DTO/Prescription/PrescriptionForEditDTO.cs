@@ -11,7 +11,7 @@ namespace API.DTO.Prescription
         public DateTime NextVisitDate { get; set; }
         public string VisitType { get; set; }
         public int PatientId { get; set; }
-        public ICollection<PrescriptionInstructionForAddDTO> PrescriptionInstructions { get; set; }
-        public ICollection<PrescriptionMedicineForAddDTO> PrescriptionMedicines { get; set; }
+        public ICollection<PrescriptionInstructionForEditDTO> PrescriptionInstructions { get; set; }
+        public ICollection<PrescriptionMedicineForEditDTO> PrescriptionMedicines { get; set; }
     }
 }

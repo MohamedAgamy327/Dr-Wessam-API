@@ -19,7 +19,6 @@ namespace API.Controllers
         private readonly IPrescriptionMedicineRepository prescriptionMedicineRepository;
         private readonly IPrescriptionInstructionRepository prescriptionInstructionRepository;
 
-
         public PrescriptionsController(IMapper mapper, IUnitOfWork unitOfWork, IPrescriptionRepository prescriptionRepository, IPrescriptionInstructionRepository prescriptionInstructionRepository, IPrescriptionMedicineRepository prescriptionMedicineRepository)
         {
             this.mapper = mapper;
@@ -46,11 +45,13 @@ namespace API.Controllers
             prescriptionInstructionRepository.Remove(model.Id);
             prescriptionMedicineRepository.Remove(model.Id);
 
-            Prescription prescription = await prescriptionRepository.Get(model.Id).ConfigureAwait(true);
-            prescription = mapper.Map<Prescription>(model);
-
+            Prescription prescription = mapper.Map<Prescription>(model);
             prescription.PrescriptionInstructions = mapper.Map<List<PrescriptionInstruction>>(model.PrescriptionInstructions);
             prescription.PrescriptionMedicines = mapper.Map<List<PrescriptionMedicine>>(model.PrescriptionMedicines);
+
+            prescriptionInstructionRepository.Add(prescription.PrescriptionInstructions);
+            prescriptionMedicineRepository.Add(prescription.PrescriptionMedicines);
+
             prescriptionRepository.Edit(prescription);
             await unitOfWork.CompleteAsync().ConfigureAwait(true);
             return Ok(mapper.Map<PrescriptionForGetDTO>(await prescriptionRepository.Get(prescription.Id).ConfigureAwait(true)));

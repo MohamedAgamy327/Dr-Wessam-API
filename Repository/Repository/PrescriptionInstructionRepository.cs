@@ -15,13 +15,17 @@ namespace Repository.Repository
         {
             this.context = context;
         }
+        public async void Add(ICollection<PrescriptionInstruction> prescriptionInstructions)
+        {
+            await context.PrescriptionInstructions.AddRangeAsync(prescriptionInstructions);
+        }
         public async Task<IEnumerable<PrescriptionInstruction>> Get(int prescriptionId)
         {
             return await context.PrescriptionInstructions.Include(i => i.Instruction).ToListAsync();
         }
         public void Remove(int prescriptionId)
         {
-            context.Remove(context.PrescriptionInstructions.Where(r => r.PrescriptionId == prescriptionId));
+            context.RemoveRange(context.PrescriptionInstructions.Where(r => r.PrescriptionId == prescriptionId));
         }
     }
 }
